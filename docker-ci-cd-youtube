@@ -1,12 +1,13 @@
-node{
-   stage('SCM Checkout'){
-       git credentialsId: 'git-creds', url: 'https://github.com/javahometech/my-app'
-   }
-   stage('Mvn Package'){
-     def mvnHOME = tool name: 'mvn', type: 'maven'
+node {
+    stage('Scm Chechout'){
+    git credentialsId: 'git-code', url: 'https://github.com/venkatnagdev/javadevops.git'
+    }
+    
+    stage('Mvn Package'){
+       def mvnHOME = tool name: 'mvn', type: 'maven'
        def mvnCMD = "${mvnHOME}/bin/mvn"
        sh "${mvnCMD} clean package"
-   }
+    }
    stage('Build Docker Image'){
      sh 'docker build -t 4ab4c602aa5/my-app .'
    }
