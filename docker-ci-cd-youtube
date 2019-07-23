@@ -1,26 +1,25 @@
-node {
-    stage('Scm Chechout'){
-    git credentialsId: 'git-code', url: 'https://github.com/venkatnagdev/javadevops.git'
-    }
-    
-    stage('Mvn Package'){
-       def mvnHOME = tool name: 'mvn', type: 'maven'
-       def mvnCMD = "${mvnHOME}/bin/mvn"
-       sh "${mvnCMD} clean package"
-    }
+node{
+   stage('SCM Checkout'){
+       git credentialsId: 'git-creds', url: 'https://github.com/javahometech/my-app'
+   }
+   stage('Mvn Package'){
+     def mvnHome = tool name: 'maven-3', type: 'maven'
+     def mvnCMD = "${mvnHome}/bin/mvn"
+     sh "${mvnCMD} clean package"
+   }
    stage('Build Docker Image'){
-     sh 'docker build -t 4ab4c602aa5/my-app .'
+     sh 'docker build -t kammana/my-app:2.0.0 .'
    }
    stage('Push Docker Image'){
-     withCredentials([string(credentialsId: 'dockerfile', variable: 'dockerHubPwd')]) {
-        sh "docker login -u 4ab4c602aa5 -p ${dockerHubPwd}"
+     withCredentials([string(credentialsId: 'docker-pwd', variable: 'dockerHubPwd')]) {
+        sh "docker login -u kammana -p ${dockerHubPwd}"
      }
-     sh 'docker push 4ab4c602aa5/my-app'
+     sh 'docker push kammana/my-app:2.0.0'
    }
    stage('Run Container on Dev Server'){
-     def dockerRun = 'docker run -p 8081:8081 -d --name my-app 4ab4c602aa5/my-app'
+     def dockerRun = 'docker run -p 8080:8080 -d --name my-app kammana/my-app:2.0.0'
      sshagent(['dev-server']) {
-       sh "ssh -o StrictHostKeyChecking=no ec2-user@18.234.190.162 ${dockerRun}"
+       sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.18.198 ${dockerRun}"
      }
    }
 }
